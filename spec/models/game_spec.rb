@@ -40,23 +40,78 @@ RSpec.describe Game, type: :model do
 
   # тесты на основную игровую логику
   context 'game mechanics' do
-    # правильный ответ должен продолжать игру
-    it 'answer correct continues game' do
-      # текущий уровень игры и статус
-      level = game_w_questions.current_level
-      q = game_w_questions.current_game_question
-      expect(game_w_questions.status).to eq(:in_progress)
+    describe '#answer_current_question!' do
+      context 'when answer is correct' do
+        let(:question) { game_w_questions.current_game_question }
+        let(:correct_answer_key) { question.correct_answer_key }
 
-      game_w_questions.answer_current_question!(q.correct_answer_key)
+        context 'and question is not last' do
+          let!(:level) { game_w_questions.current_level }
+          let!(:answer_question) { game_w_questions.answer_current_question!(correct_answer_key) }
 
-      # перешли на след. уровень
-      expect(game_w_questions.current_level).to eq(level + 1)
-      # ранее текущий вопрос стал предыдущим
-      expect(game_w_questions.previous_game_question).to eq(q)
-      expect(game_w_questions.current_game_question).not_to eq(q)
-      # игра продолжается
-      expect(game_w_questions.status).to eq(:in_progress)
-      expect(game_w_questions.finished?).to be_falsey
+          it 'should increase level by 1' do
+            expect(game_w_questions.current_level).to eq(level + 1)
+          end
+
+          it 'shouldn`t finish game' do
+            expect(game_w_questions.finished?).to be_falsey
+          end
+
+          it 'should should keep game in progress' do
+            expect(game_w_questions.status).to eq(:in_progress)
+          end
+
+          it 'should current question to become previous' do
+            expect(game_w_questions.previous_game_question).to eq(question)
+          end
+
+          it 'should previous question not to become current' do
+            expect(game_w_questions.current_game_question).not_to eq(question)
+          end
+        end
+
+        context 'and question is last' do
+          let!(:level) { game_w_questions.current_level = 14 }
+          let!(:answer_question) { game_w_questions.answer_current_question!(correct_answer_key) }
+
+          it 'should finish game' do
+            expect(game_w_questions.finished?).to be_truthy
+          end
+
+          it 'should game status to become won' do
+            expect(game_w_questions.status).to eq(:won)
+          end
+
+          it 'should assign the biggiest prize' do
+            expect(game_w_questions.prize).to eq(1_000_000)
+          end
+        end
+
+        context 'and time is over' do
+          let!(:time_is_over) { game_w_questions.created_at = 1.hour.ago }
+          let!(:answer_question) { game_w_questions.answer_current_question!(correct_answer_key) }
+
+          it 'should finish game' do
+            expect(game_w_questions.finished?).to be_truthy
+          end
+
+          it 'should game status to become timeout' do
+            expect(game_w_questions.status).to eq(:timeout)
+          end
+        end
+      end
+
+      context 'when answer is wrong' do
+        let!(:wrong_answer) { game_w_questions.answer_current_question!(:a) }
+
+        it 'should finish game' do
+          expect(game_w_questions.finished?).to be_truthy
+        end
+
+        it 'should game status to become fail' do
+          expect(game_w_questions.status).to eq(:fail)
+        end
+      end
     end
 
     it '.take_money! finishes game and gives money to user' do
