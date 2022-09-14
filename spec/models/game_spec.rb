@@ -54,7 +54,7 @@ RSpec.describe Game, type: :model do
           end
 
           it 'shouldn`t finish game' do
-            expect(game_w_questions.finished?).to be_falsey
+            expect(game_w_questions.finished?).to be false
           end
 
           it 'should should keep game in progress' do
@@ -75,7 +75,7 @@ RSpec.describe Game, type: :model do
           let!(:answer_question) { game_w_questions.answer_current_question!(correct_answer_key) }
 
           it 'should finish game' do
-            expect(game_w_questions.finished?).to be_truthy
+            expect(game_w_questions.finished?).to be true
           end
 
           it 'should game status to become won' do
@@ -92,7 +92,7 @@ RSpec.describe Game, type: :model do
           let!(:answer_question) { game_w_questions.answer_current_question!(correct_answer_key) }
 
           it 'should finish game' do
-            expect(game_w_questions.finished?).to be_truthy
+            expect(game_w_questions.finished?).to be true
           end
 
           it 'should game status to become timeout' do
@@ -105,7 +105,7 @@ RSpec.describe Game, type: :model do
         let!(:wrong_answer) { game_w_questions.answer_current_question!(:a) }
 
         it 'should finish game' do
-          expect(game_w_questions.finished?).to be_truthy
+          expect(game_w_questions.finished?).to be true
         end
 
         it 'should game status to become fail' do
@@ -114,19 +114,30 @@ RSpec.describe Game, type: :model do
       end
     end
 
-    it '.take_money! finishes game and gives money to user' do
-      q = game_w_questions.current_game_question
-      game_w_questions.answer_current_question!(q.correct_answer_key)
+    describe '#take_money!' do
+      before(:each) do
+        q = game_w_questions.current_game_question
+        game_w_questions.answer_current_question!(q.correct_answer_key)
+        game_w_questions.take_money!
+      end
 
-      game_w_questions.take_money!
+      let(:prize) { game_w_questions.prize }
 
-      prize = game_w_questions.prize
+      it 'should increase the prize' do
+        expect(prize).to be > 0
+      end
 
-      expect(prize).to be > 0
+      it 'should change game status to :money' do
+        expect(game_w_questions.status).to eq :money
+      end
 
-      expect(game_w_questions.status).to eq :money
-      expect(game_w_questions.finished?).to be_truthy
-      expect(user.balance).to eq prize
+      it 'should finish game' do
+        expect(game_w_questions.finished?).to be true
+      end
+
+      it 'should increase user balance by prize amount' do
+        expect(user.balance).to eq prize
+      end
     end
   end
 
@@ -135,7 +146,7 @@ RSpec.describe Game, type: :model do
     # перед каждым тестом "завершаем игру"
     before(:each) do
       game_w_questions.finished_at = Time.now
-      expect(game_w_questions.finished?).to be_truthy
+      expect(game_w_questions.finished?).to be true
     end
 
     it ':won' do

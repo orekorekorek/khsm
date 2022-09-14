@@ -62,7 +62,7 @@ class GameQuestion < ActiveRecord::Base
     variants[correct_answer_key]
   end
 
-  # Добавляем в help_hash по ключю fifty_fifty - массив из двух вариантов: правильный и случайный
+  # Добавляем в help_hash по ключу fifty_fifty - массив из двух вариантов: правильный и случайный
   # и сохраняем объект
   def add_fifty_fifty
     help_hash[:fifty_fifty] = [
