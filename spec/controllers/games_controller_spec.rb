@@ -19,9 +19,7 @@ RSpec.describe GamesController, type: :controller do
 
   describe '#create' do
     context 'when user is authorized' do
-      before do
-        sign_in user
-      end
+      before { sign_in user }
 
       context 'and tries to create first game' do
         before do
@@ -97,7 +95,7 @@ RSpec.describe GamesController, type: :controller do
     end
 
     context 'when user is signed in' do
-      before(:each) do
+      before do
         sign_in user
         get :show, id: game_w_questions.id
       end
@@ -141,7 +139,7 @@ RSpec.describe GamesController, type: :controller do
 
   describe '#answer' do
     context 'when user is authorized' do
-      before(:each) do
+      before do
         sign_in user
         put :answer, id: game_w_questions.id, letter: game_w_questions.current_game_question.correct_answer_key
         @game = assigns(:game)
@@ -183,9 +181,7 @@ RSpec.describe GamesController, type: :controller do
 
   describe '#help' do
     context 'when user is authorized' do
-      before(:each) do
-        sign_in user
-      end
+      before { sign_in user }
 
       context 'when help is not used' do
         it 'should empty help hash for current question' do
@@ -198,7 +194,7 @@ RSpec.describe GamesController, type: :controller do
       end
 
       context 'when help is used' do
-        before(:each) do
+        before do
           put :help, id: game_w_questions.id, help_type: :audience_help
           @game = assigns(:game)
         end
@@ -244,7 +240,7 @@ RSpec.describe GamesController, type: :controller do
 
   describe '#take_money' do
     context 'when user is authorized' do
-      before(:each) do
+      before do
         sign_in user
         game_w_questions.update_attribute(:current_level, 2)
         put :take_money, id: game_w_questions.id
