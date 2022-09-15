@@ -139,26 +139,52 @@ RSpec.describe GamesController, type: :controller do
 
   describe '#answer' do
     context 'when user is authorized' do
-      before do
-        sign_in user
-        put :answer, id: game_w_questions.id, letter: game_w_questions.current_game_question.correct_answer_key
-        @game = assigns(:game)
+      before { sign_in user }
+
+      context 'and answer is correct' do
+        before do
+          put :answer, id: game_w_questions.id, letter: game_w_questions.current_game_question.correct_answer_key
+          @game = assigns(:game)
+        end
+
+        it 'should not finish game' do
+          expect(@game.finished?).to be false
+        end
+
+        it 'should increase level' do
+          expect(@game.current_level).to be > 0
+        end
+
+        it 'should redirect to game page' do
+          expect(response).to redirect_to(game_path(@game))
+        end
+
+        it 'should not show flash' do
+          expect(flash.empty?).to be true
+        end
       end
 
-      it 'should not finish game' do
-        expect(@game.finished?).to be false
-      end
+      context 'and answer is wrong' do
+        before do
+          put :answer, id: game_w_questions.id, letter: 'a'
+          @game = assigns(:game)
+        end
 
-      it 'should increase level' do
-        expect(@game.current_level).to be > 0
-      end
+        it 'should finish game' do
+          expect(@game.finished?).to be true
+        end
 
-      it 'should redirect to game page' do
-        expect(response).to redirect_to(game_path(@game))
-      end
+        it 'should show flash' do
+          expect(flash.alert).to be
+        end
 
-      it 'should not show flash' do
-        expect(flash.empty?).to be true
+        it 'should redirect to user page' do
+          expect(response).to redirect_to(user_path(user))
+        end
+
+        it 'should change game status to fail' do
+          expect(@game.status).to eq(:fail)
+        end
       end
     end
 
