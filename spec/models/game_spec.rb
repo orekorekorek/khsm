@@ -142,7 +142,7 @@ RSpec.describe Game, type: :model do
   end
 
   # группа тестов на проверку статуса игры
-  context '.status' do
+  describe '#status' do
     # перед каждым тестом "завершаем игру"
     before(:each) do
       game_w_questions.finished_at = Time.now
@@ -172,20 +172,13 @@ RSpec.describe Game, type: :model do
 
   describe '#current_game_question' do
     it 'should return current game question' do
-      expect(game_w_questions.current_game_question.level).to eq(0)
+      expect(game_w_questions.current_game_question).to eq(game_w_questions.game_questions.first)
     end
   end
 
   describe '#previous_level' do
     it 'should return -1 for new game' do
       expect(game_w_questions.previous_level).to eq(-1)
-    end
-
-    it 'should return previous level' do
-      q = game_w_questions.current_game_question
-      game_w_questions.answer_current_question!(q.correct_answer_key)
-
-      expect(game_w_questions.previous_level).to eq(0)
     end
   end
 end
