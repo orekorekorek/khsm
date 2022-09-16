@@ -17,7 +17,7 @@ gem 'twitter-bootstrap-rails'
 
 group :development, :test do
   gem 'byebug'
-  gem 'factory_girl_rails'
+  gem 'factory_bot_rails'
   gem 'rspec-rails', '~> 3.4'
   gem 'shoulda-matchers'
   gem 'sqlite3', '~> 1.3.13'

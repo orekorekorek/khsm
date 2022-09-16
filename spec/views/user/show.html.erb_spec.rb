@@ -1,17 +1,17 @@
 require 'rails_helper'
 
 RSpec.describe 'users/show', type: :view do
-  let(:user) { FactoryGirl.create(:user, name: 'Example') }
+  let(:user) { FactoryBot.create(:user, name: 'Example') }
 
   before do
     assign(:user, user)
     assign(:games, [
-             FactoryGirl.build_stubbed(:game,
+             FactoryBot.build_stubbed(:game,
                                        id: 1337,
                                        created_at: Time.parse('2017.10.09, 13:00'),
                                        current_level: 10, prize: 1000),
 
-             FactoryGirl.build_stubbed(:game,
+             FactoryBot.build_stubbed(:game,
                                        id: 1337,
                                        created_at: Time.parse('2017.10.09, 13:00'),
                                        current_level: 10, prize: 1000)
@@ -58,7 +58,7 @@ RSpec.describe 'users/show', type: :view do
 
   context 'when user is not owner of viewed user account' do
     context 'and user is authorized' do
-      let(:another_user) { FactoryGirl.create(:user, name: 'AnotherExample') }
+      let(:another_user) { FactoryBot.create(:user, name: 'AnotherExample') }
 
       before { sign_in another_user }
 

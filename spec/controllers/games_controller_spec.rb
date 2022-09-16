@@ -11,11 +11,11 @@ require 'support/my_spec_helper' # наш собственный класс с �
 #
 RSpec.describe GamesController, type: :controller do
   # обычный пользователь
-  let(:user) { FactoryGirl.create(:user) }
+  let(:user) { FactoryBot.create(:user) }
   # админ
-  let(:admin) { FactoryGirl.create(:user, is_admin: true) }
+  let(:admin) { FactoryBot.create(:user, is_admin: true) }
   # игра с прописанными игровыми вопросами
-  let(:game_w_questions) { FactoryGirl.create(:game_with_questions, user: user) }
+  let(:game_w_questions) { FactoryBot.create(:game_with_questions, user: user) }
 
   describe '#create' do
     context 'when user is authorized' do
@@ -120,7 +120,7 @@ RSpec.describe GamesController, type: :controller do
       end
 
       context 'and game does not belong to user' do
-        let(:game_w_questions) { FactoryGirl.create(:game_with_questions) }
+        let(:game_w_questions) { FactoryBot.create(:game_with_questions) }
 
         it 'should return not 200 OK response status' do
           expect(response.status).not_to eq(200)
