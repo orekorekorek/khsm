@@ -11,11 +11,11 @@ class GameHelpGenerator
     result_array = []
 
     keys.each do |key|
-      if key == correct_key
-        result_array << rand(45..90)
-      else
-        result_array << rand(1..60)
-      end
+      result_array << if key == correct_key
+                        rand(45..90)
+                      else
+                        rand(1..60)
+                      end
     end
 
     # нормализуем массив
@@ -30,7 +30,7 @@ class GameHelpGenerator
   # correct_key - ключ правильного ответа, он будет выбран с бОльшим весом
   def self.friend_call(keys, correct_key)
     # c ~80% вероятностью выбираем правильный ключ, и с 20% - неправильный
-    key = (rand(10) > 2) ? correct_key : keys.sample
+    key = rand(10) > 2 ? correct_key : keys.sample
 
     I18n.t('game_help.friend_call', name: I18n.t('game_help.friends').sample, variant: key.upcase)
   end
