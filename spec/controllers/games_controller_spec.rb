@@ -209,17 +209,66 @@ RSpec.describe GamesController, type: :controller do
     context 'when user is authorized' do
       before { sign_in user }
 
-      context 'when help is not used' do
-        it 'should empty help hash for current question' do
-          expect(game_w_questions.current_game_question.help_hash[:audience_help]).not_to be
+      context 'and help is not used' do
+        it 'should not contain audience help in help hash before help is used' do
+          expect(game_w_questions.current_game_question.help_hash).not_to include(:audience_help)
         end
 
-        it 'should not have used help' do
+        it 'should not contain fifty fifty help in help hash before help used' do
+          expect(game_w_questions.current_game_question.help_hash).not_to include(:fifty_fifty)
+        end
+
+        it 'should not contain friend call help in help hash before help used' do
+          expect(game_w_questions.current_game_question.help_hash).not_to include(:friend_call)
+        end
+
+        it 'should not have used audience help' do
           expect(game_w_questions.audience_help_used).to be false
+        end
+
+        it 'should not have used fifty fifty' do
+          expect(game_w_questions.fifty_fifty_used).to be false
+        end
+
+        it 'should not have used friend call' do
+          expect(game_w_questions.friend_call_used).to be false
         end
       end
 
-      context 'when help is used' do
+      context 'and fifty fifty help is used' do
+        before do
+          put :help, id: game_w_questions.id, help_type: :fifty_fifty
+          @game = assigns(:game)
+        end
+
+        let(:correct_answer) { game_w_questions.current_game_question.correct_answer_key }
+
+        it 'should not finish game' do
+          expect(@game.finished?).to be false
+        end
+
+        it 'should have used help' do
+          expect(@game.fifty_fifty_used).to be true
+        end
+
+        it 'should add help to help hash' do
+          expect(@game.current_game_question.help_hash[:fifty_fifty]).to be
+        end
+
+        it 'should contain 2 variants of answers' do
+          expect(@game.current_game_question.help_hash[:fifty_fifty].size).to eq(2)
+        end
+
+        it 'should contain correct answer' do
+          expect(@game.current_game_question.help_hash[:fifty_fifty]).to include(correct_answer)
+        end
+
+        it 'should redirect to game page' do
+          expect(response).to redirect_to(game_path(@game))
+        end
+      end
+
+      context 'and audience help is used' do
         before do
           put :help, id: game_w_questions.id, help_type: :audience_help
           @game = assigns(:game)
@@ -237,8 +286,41 @@ RSpec.describe GamesController, type: :controller do
           expect(@game.current_game_question.help_hash[:audience_help]).to be
         end
 
-        it 'should contain keys of answers in help' do
+        it 'should contain keys of answers in help hash' do
           expect(@game.current_game_question.help_hash[:audience_help].keys).to contain_exactly('a', 'b', 'c', 'd')
+        end
+
+        it 'should redirect to game page' do
+          expect(response).to redirect_to(game_path(@game))
+        end
+      end
+
+      context 'and friend call is used' do
+        before do
+          put :help, id: game_w_questions.id, help_type: :friend_call
+          @game = assigns(:game)
+        end
+
+        let(:help_hash) { @game.current_game_question.help_hash }
+
+        it 'should not finish game' do
+          expect(@game.finished?).to be false
+        end
+
+        it 'should have used friend call' do
+          expect(@game.friend_call_used).to be true
+        end
+
+        it 'should add friend call to help hash' do
+          expect(help_hash).to include(:friend_call)
+        end
+
+        it 'should contain string with friend guess in help hash' do
+          expect(help_hash[:friend_call]).to be_a String
+        end
+
+        it 'should contain variant of answer in friend guess' do
+          expect(help_hash[:friend_call][-1].downcase).to match(/[abcd]/)
         end
 
         it 'should redirect to game page' do
